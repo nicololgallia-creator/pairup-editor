@@ -32,9 +32,10 @@ ARCH=x64
 # Code - OSS's own product.json has none of these except voiceWsUrl, so this list mostly
 # guards against a newer tag adding them. PairUp ships no Copilot: compile() deletes the
 # built-in chat extension after packaging and patches/05 turns AI features off by default.
-# defaultChatAgent stays: without it the 1.144 workbench never draws its window (found 2026-11-03).
+# The chat keys stay (2026-11-03): without defaultChatAgent the 1.144 workbench never draws
+# its window, and without builtInExtensionsEnabledWithAutoUpdates (overridden to []) the
+# extension scan throws "is not iterable" and no extension loads.
 DELETE_KEYS='[
-  "builtInExtensionsEnabledWithAutoUpdates","trustedExtensionAuthAccess","agentsTelemetryAppName",
   "enableTelemetry","aiConfig","crashReporter","msftInternalDomains","showTelemetryOptOut",
   "removeTelemetryMachineId","enabledTelemetryLevels",
   "tasConfig","npsSurveyUrl","surveys",

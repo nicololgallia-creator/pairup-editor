@@ -24,8 +24,8 @@ if (mode === "merge") {
     console.error("updateUrl points at Microsoft");
     process.exit(1);
   }
-  if (!p.defaultChatAgent) {
-    console.error("defaultChatAgent is missing; the workbench needs it to start");
+  if (!p.defaultChatAgent || !Array.isArray(p.builtInExtensionsEnabledWithAutoUpdates)) {
+    console.error("defaultChatAgent or builtInExtensionsEnabledWithAutoUpdates is missing; the workbench needs both to start");
     process.exit(1);
   }
 } else if (mode === "name") {

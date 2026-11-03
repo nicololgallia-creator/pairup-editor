@@ -22,6 +22,7 @@
     "x64": { "clsid": "{635F02B3-99C7-47D3-B340-C3498E4C5F27}" },
     "arm64": { "clsid": "{DA383141-E721-470D-9CBC-B114BEE830D1}" }
   },
+  "builtInExtensionsEnabledWithAutoUpdates": [],
   "quality": "stable",
   "updateUrl": "https://pairup.fly.dev",
   "downloadUrl": "https://github.com/nicololgallia-creator/pairup-editor/releases",
