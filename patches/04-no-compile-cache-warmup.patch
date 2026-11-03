@@ -1,0 +1,14 @@
+diff --git a/build/lib/nodeCompileCache.ts b/build/lib/nodeCompileCache.ts
+index 66dfaf4..b1ee772 100644
+--- a/build/lib/nodeCompileCache.ts
++++ b/build/lib/nodeCompileCache.ts
+@@ -28,6 +28,9 @@ export function shouldGenerateNodeCompileCache(platform: string, arch: string, p
+ 	if (!product.quality) {
+ 		return false;
+ 	}
++	// PairUp: the warmup launches the packaged app on the GitHub runner and never reaches ready there (build attempt 11);
++	// the cache only speeds up startup, so the build ships without it.
++	return false;
+ 
+ 	return platform === 'darwin' ? arch === 'arm64' : (platform === 'linux' || platform === 'win32') && arch === 'x64';
+ }
