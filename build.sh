@@ -89,9 +89,9 @@ prepare() {
     node "$src/vscode/scripts/sync-web.mjs"   # fills media/ (app.js, app.css, favicon.svg)
     dst=vscode/extensions/pairup
     rm -rf "$dst"; mkdir -p "$dst"
-    cp "$src/vscode/package.json" "$src/vscode/extension.js" "$dst/"
+    cp "$src/vscode/package.json" "$src/vscode/"*.js "$dst/"   # every top-level module: extension.js requires about.js and connect.js
     cp -r "$src/vscode/media" "$dst/media"   # whole folder, so whatever sync-web adds comes along
-    for f in package.json extension.js media/host.js media/pairup.svg media/app.js media/app.css media/favicon.svg; do
+    for f in package.json extension.js about.js connect.js media/host.js media/pairup.svg media/app.js media/app.css media/favicon.svg; do
       [ -f "$dst/$f" ] || die "extension file missing: $f"
     done
   fi
