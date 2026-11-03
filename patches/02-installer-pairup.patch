@@ -1,0 +1,41 @@
+diff --git a/build/gulpfile.vscode.win32.ts b/build/gulpfile.vscode.win32.ts
+index 0722b7f..2c633ca 100644
+--- a/build/gulpfile.vscode.win32.ts
++++ b/build/gulpfile.vscode.win32.ts
+@@ -113,8 +113,10 @@ function buildWin32Setup(arch: string, target: string): task.CallbackTask {
+ 			Quality: quality
+ 		};
+ 
+-		if (quality === 'stable' || quality === 'insider') {
+-			definitions['AppxPackage'] = `${quality === 'stable' ? 'code' : 'code_insider'}_${arch}.appx`;
++		// PairUp: the Explorer context-menu package only exists in Microsoft's own pipeline; without the file Inno Setup would fail.
++		const appxPackage = `${quality === 'stable' ? 'code' : 'code_insider'}_${arch}.appx`;
++		if ((quality === 'stable' || quality === 'insider') && fs.existsSync(path.join(sourcePath, 'appx', appxPackage))) {
++			definitions['AppxPackage'] = appxPackage;
+ 			definitions['AppxPackageDll'] = `${quality === 'stable' ? 'code' : 'code_insider'}_explorer_command_${arch}.dll`;
+ 			definitions['AppxPackageName'] = `${product.win32AppUserModelId}`;
+ 			const ctxMenu = (product as { win32ContextMenu?: Record<string, { clsid: string }> }).win32ContextMenu;
+diff --git a/build/win32/code.iss b/build/win32/code.iss
+index f93cb9d..9dc40c3 100644
+--- a/build/win32/code.iss
++++ b/build/win32/code.iss
+@@ -8,14 +8,14 @@
+ AppId={#AppId}
+ AppName={#NameLong}
+ AppVerName={#NameVersion}
+-AppPublisher=Microsoft Corporation
+-AppPublisherURL=https://code.visualstudio.com/
+-AppSupportURL=https://code.visualstudio.com/
+-AppUpdatesURL=https://code.visualstudio.com/
++AppPublisher={#NameLong}
++AppPublisherURL=https://github.com/nicololgallia-creator/pairup-editor
++AppSupportURL=https://github.com/nicololgallia-creator/pairup-editor/issues
++AppUpdatesURL=https://github.com/nicololgallia-creator/pairup-editor/releases
+ DefaultGroupName={#NameLong}
+ AllowNoIcons=yes
+ OutputDir={#OutputDir}
+-OutputBaseFilename=VSCodeSetup
++OutputBaseFilename={#NameShort}Setup
+ Compression=lzma
+ SolidCompression=yes
+ AppMutex={code:GetAppMutex}

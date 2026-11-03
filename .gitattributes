@@ -7,3 +7,6 @@
 *.mjs text eol=lf
 *.ico binary
 *.png binary
+patches/02-installer-pairup.patch -text
+patches/03-telemetry-defaults-off.patch -text
+*.bmp binary

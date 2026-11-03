@@ -19,11 +19,15 @@ if (mode === "merge") {
   const p = product;
   console.log(`nameShort=${p.nameShort} nameLong=${p.nameLong} applicationName=${p.applicationName} dataFolderName=${p.dataFolderName} urlProtocol=${p.urlProtocol}`);
   console.log(`gallery=${p.extensionsGallery?.serviceUrl}`);
-  if ("updateUrl" in p) {
-    console.error("updateUrl is still in product.json");
+  console.log(`quality=${p.quality} updateUrl=${p.updateUrl}`);
+  if (/microsoft|visualstudio|vscode-cdn/i.test(String(p.updateUrl))) {
+    console.error("updateUrl points at Microsoft");
     process.exit(1);
   }
-  console.log("updateUrl: absent");
+  if ("defaultChatAgent" in p) {
+    console.error("defaultChatAgent is still in product.json");
+    process.exit(1);
+  }
 } else if (mode === "name") {
   process.stdout.write(String(product.nameShort));
 } else {

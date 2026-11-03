@@ -30,9 +30,10 @@ ARCH=x64
 # Note: VSCodium does not delete keys. It overwrites the help URLs (prepare_vscode.sh
 # lines 37-51) and rewrites *.data.microsoft.com hosts (undo_telemetry.sh lines 10-11).
 # Code - OSS's own product.json has none of these except voiceWsUrl, so this list mostly
-# guards against a newer tag adding them.
+# guards against a newer tag adding them. PairUp ships no Copilot: the chat agent keys go
+# too, and compile() deletes the built-in chat extension after packaging.
 DELETE_KEYS='[
-  "updateUrl","downloadUrl",
+  "defaultChatAgent","builtInExtensionsEnabledWithAutoUpdates","trustedExtensionAuthAccess","agentsTelemetryAppName",
   "enableTelemetry","aiConfig","crashReporter","msftInternalDomains","showTelemetryOptOut",
   "removeTelemetryMachineId","enabledTelemetryLevels",
   "tasConfig","npsSurveyUrl","surveys",
@@ -76,6 +77,9 @@ prepare() {
     if [ -f "icons/pairup-$s.png" ]; then cp "icons/pairup-$s.png" "vscode/resources/win32/code_${s}x${s}.png"
     else put icons/pairup-256.png "vscode/resources/win32/code_${s}x${s}.png"; fi
   done
+  # Installer wizard images (icons/inno, from icons/tools/make-bmp.mjs); Microsoft's carry the VS Code logo.
+  if [ -f icons/inno/inno-big-100.bmp ]; then cp icons/inno/inno-*.bmp vscode/resources/win32/
+  else warn "icons/inno missing, the installer keeps the VS Code wizard images"; fi
 
   # 5. the extension from the private repo. An explicit PAIRUP_SRC must exist; the
   # default path may be missing (probe.yml), which only warns.
@@ -113,6 +117,11 @@ compile() {
   # Same env as Microsoft's product-build-win32-setup.yml lines 101-105 (public CI path)
   export ELECTRON_SKIP_BINARY_DOWNLOAD=1 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 FOUNDRY_LOCAL_SKIP_INSTALL=1
   export npm_config_arch="$ARCH" npm_config_foreground_scripts=true
+  # The build id the app reports as its commit and the updater compares with the feed: one hash of this
+  # repo's commit and the private repo's, so a change to either is a new version (build/lib/getVersion.ts).
+  src="${PAIRUP_SRC:-$ROOT/../pairup-cloud}"; src="${src//\\//}"
+  export BUILD_SOURCEVERSION="$(printf '%s %s' "$(git -C "$ROOT" rev-parse HEAD)" "$(git -C "$src" rev-parse HEAD 2>/dev/null || echo none)" | sha256sum | cut -c1-40)"
+  echo "build id $BUILD_SOURCEVERSION"
   cd vscode
   for i in 1 2 3; do
     npm ci && break
@@ -135,18 +144,36 @@ compile() {
   # VSIX); the non-CI chain compiles it from the tree first, so do the same. Found on the first runner build, 2026-11-03.
   npm run gulp compile-copilot-extension-build
   npm run gulp "vscode-win32-$ARCH-min-ci"
-  cd ..
-
   # Output folder: gulpfile.vscode.ts L603 `VSCode${dashed(platform)}${dashed(arch)}`, placed
   # at path.dirname(root) (L138), the folder that holds vscode/.
   OUT_DIR="$ROOT/VSCode-win32-$ARCH"
-  [ -d "$OUT_DIR" ] || die "gulp output $OUT_DIR not found"
+  [ -d "$OUT_DIR/resources/app" ] || die "gulp output $OUT_DIR not found"
+  # PairUp ships no Copilot. The packaging step needs the built-in chat extension present to finish, so it goes now.
+  strip_copilot "$OUT_DIR"
+  # The installer (build/gulpfile.vscode.win32.ts): inno_updater into tools/, then Inno Setup on build/win32/code.iss.
+  npm run gulp "vscode-win32-$ARCH-inno-updater"
+  npm run gulp "vscode-win32-$ARCH-user-setup"
+  cd ..
+
   exe="$(node "$ROOT/tools/product.mjs" name vscode/product.json).exe"
   [ -f "$OUT_DIR/$exe" ] || die "$exe missing in $OUT_DIR"
   mkdir -p out
   zip="$ROOT/out/PairUp-win32-$ARCH-$TAG.zip"
   make_zip "$OUT_DIR" "$zip"
-  (cd out && sha256sum "$(basename "$zip")" > SHA256SUMS && cat SHA256SUMS)
+  setup="$(ls vscode/.build/win32-$ARCH/user-setup/*Setup*.exe 2>/dev/null | head -1 || true)"
+  [ -n "$setup" ] || die "installer not found under vscode/.build/win32-$ARCH/user-setup"
+  mv "$setup" "$ROOT/out/PairUpSetup-$ARCH-$TAG.exe"
+  (cd out && sha256sum *.zip *.exe > SHA256SUMS && cat SHA256SUMS)
+  node "$ROOT/tools/update-feed.mjs" "$OUT_DIR/resources/app/product.json" "$ROOT/out" "$TAG"
+}
+
+strip_copilot() { # strip_copilot <packaged app folder>: only ever the two Copilot folders inside a real build output
+  local app="$1"
+  [ -n "$app" ] && [ -f "$app/resources/app/product.json" ] || die "strip_copilot: $app is not a packaged app"
+  for d in "resources/app/extensions/copilot" "bin/copilot-shim"; do
+    [ -e "$app/$d" ] && rm -r -- "$app/$d" && echo "removed $d"
+  done
+  return 0
 }
 
 if [ "$MODE" != compile ]; then prepare; fi
