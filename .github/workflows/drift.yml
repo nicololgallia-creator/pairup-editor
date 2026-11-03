@@ -1,0 +1,47 @@
+name: Drift
+
+# Draft (card E2). Tries the patches on the newest upstream tag, without compiling.
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Find the newest upstream tag
+        id: tag
+        run: |
+          newest="$(git ls-remote --tags --refs https://github.com/microsoft/vscode.git \
+            | sed 's|.*refs/tags/||' | grep -E '^1\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)"
+          test -n "$newest"
+          echo "newest upstream tag: $newest (pinned: $(cat UPSTREAM_TAG))"
+          echo "tag=$newest" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare against the newest tag
+        env:
+          UPSTREAM_TAG_OVERRIDE: ${{ steps.tag.outputs.tag }}
+        run: bash build.sh --no-compile
+
+      - name: Open an issue
+        if: failure() && steps.tag.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          title="Patches do not apply on $TAG"
+          open="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq length)"
+          if [ "$open" = "0" ]; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" \
+              --body "build.sh --no-compile failed against upstream $TAG. Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          fi

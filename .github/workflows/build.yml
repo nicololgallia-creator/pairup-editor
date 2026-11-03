@@ -1,0 +1,61 @@
+name: Build
+
+# Draft (card D1), not run yet. Never add a pull_request trigger: this job holds a deploy key.
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 180
+    defaults:
+      run:
+        shell: bash
+    env:
+      NODE_OPTIONS: --max-old-space-size=8192
+      PAIRUP_SRC: ${{ github.workspace }}/pairup-cloud
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # PAIRUP_CLOUD_DEPLOY_KEY is a read-only deploy key on the private repo. The owner
+      # adds it later (private repo: Settings, Deploy keys; this repo: Settings, Secrets).
+      # For a release build, replace main with a tag.
+      - name: Check out the private product repo
+        uses: actions/checkout@v7
+        with:
+          repository: nicololgallia-creator/pairup-cloud
+          ref: fork # the extension lives on the fork branch until it is merged into main
+          path: pairup-cloud
+          ssh-key: ${{ secrets.PAIRUP_CLOUD_DEPLOY_KEY }}
+          persist-credentials: false
+
+      - name: Clone upstream, patch, set product.json, copy icons and extension
+        run: bash build.sh --no-compile
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: vscode/.nvmrc
+
+      # VSCodium builds with Python 3.11 (ci-build-windows.yml).
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Compile, zip, hash
+        run: bash build.sh --compile-only
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: PairUp-win32-x64
+          path: out/*
+          retention-days: 7
+          if-no-files-found: error

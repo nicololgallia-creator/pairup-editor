@@ -1,0 +1,4 @@
+vscode/
+VSCode-win32-*/
+out/
+node_modules/

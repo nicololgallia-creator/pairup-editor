@@ -1,0 +1,71 @@
+name: Probe
+
+# Retires the runner risk before any long build (card C1). Run by hand.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Tools on the runner
+        run: |
+          echo "node:   $(node --version)"
+          echo "npm:    $(npm --version)"
+          echo "python: $(python --version 2>&1)"
+          echo "setuptools: $(python -m pip show setuptools 2>&1 | head -n 2 | tr '\n' ' ')"
+          echo "git:    $(git --version)"
+          echo "jq:     $(jq --version)"
+          echo "7z:     $(command -v 7z || echo missing)"
+          VSWHERE="/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe"
+          echo "Visual Studio with the C++ tools:"
+          "$VSWHERE" -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          # Component ids from the How-to-Contribute wiki (Windows prerequisites).
+          # Unverified on a runner until this job has run.
+          for id in \
+            Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre \
+            Microsoft.VisualStudio.Component.VC.ATL.Spectre \
+            Microsoft.VisualStudio.Component.VC.ATLMFC.Spectre \
+            Microsoft.VisualStudio.Component.Windows11SDK.26100; do
+            found="$("$VSWHERE" -latest -products '*' -requires "$id" -property installationPath)"
+            if [ -n "$found" ]; then echo "$id: found"; else echo "$id: MISSING"; fi
+          done
+          echo "Free disk:"
+          df -h /c /d 2>/dev/null || df -h
+
+      - name: Prepare without compiling (PAIRUP_SRC is not set, the extension copy is skipped)
+        run: bash build.sh --no-compile
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: vscode/.nvmrc
+
+      - name: npm ci, timed
+        working-directory: vscode
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+          ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+          FOUNDRY_LOCAL_SKIP_INSTALL: "1"
+          npm_config_foreground_scripts: "true"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "node: $(node --version)"
+          start=$(date +%s)
+          status=0
+          npm ci || status=$?
+          secs=$(( $(date +%s) - start ))
+          echo "npm ci wall time: ${secs} s (exit ${status})"
+          echo "npm ci wall time: ${secs} s (exit ${status})" >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"

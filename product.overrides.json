@@ -1,0 +1,33 @@
+{
+  "nameShort": "PairUp",
+  "nameLong": "PairUp",
+  "applicationName": "pairup",
+  "dataFolderName": ".pairup",
+  "urlProtocol": "pairup",
+  "serverApplicationName": "pairup-server",
+  "serverDataFolderName": ".pairup-server",
+  "tunnelApplicationName": "pairup-tunnel",
+  "win32MutexName": "pairup",
+  "win32DirName": "PairUp",
+  "win32NameVersion": "PairUp",
+  "win32RegValueName": "PairUp",
+  "win32AppUserModelId": "PairUp.PairUp",
+  "win32ShellNameShort": "PairUp",
+  "win32x64AppId": "{{5F4319AA-97CB-4C90-9A79-F850661953AF}",
+  "win32x64UserAppId": "{{B76E38FC-06A3-44F6-A76C-F1981B4D62A1}",
+  "win32arm64AppId": "{{8149B8EB-8B56-454C-A04F-0F9030605997}",
+  "win32arm64UserAppId": "{{BA1BFF0D-10F3-4411-82AC-774C0D145F87}",
+  "darwinBundleIdentifier": "com.pairup.editor",
+  "licenseUrl": "https://github.com/nicololgallia-creator/pairup-editor/blob/main/LICENSE",
+  "reportIssueUrl": "",
+  "extensionsGallery": {
+    "serviceUrl": "https://open-vsx.org/vscode/gallery",
+    "itemUrl": "https://open-vsx.org/vscode/item",
+    "resourceUrlTemplate": "https://open-vsx.org/vscode/unpkg/{publisher}/{name}/{version}/{path}",
+    "controlUrl": "",
+    "recommendationsUrl": ""
+  },
+  "sharedDataFolderName": ".pairup-shared",
+  "win32TunnelServiceMutex": "pairup-tunnelservice",
+  "win32TunnelMutex": "pairup-tunnel"
+}
