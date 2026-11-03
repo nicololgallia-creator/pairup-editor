@@ -11,3 +11,4 @@ patches/02-installer-pairup.patch -text
 patches/03-telemetry-defaults-off.patch -text
 *.bmp binary
 patches/04-no-compile-cache-warmup.patch -text
+patches/05-ai-features-off-by-default.patch -text

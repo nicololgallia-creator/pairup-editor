@@ -1,6 +1,6 @@
 // product.json for the fork, with Node instead of jq (the runner and this PC both have Node; neither needs jq).
 //   node tools/product.mjs merge <product.json> <overrides.json>   merge the overrides in, drop DELETE_KEYS (env, JSON array)
-//   node tools/product.mjs show  <product.json>                    print the name fields; exit 1 if updateUrl is still there
+//   node tools/product.mjs show  <product.json>                    print the name fields; exit 1 if updateUrl is Microsoft's or defaultChatAgent is missing
 //   node tools/product.mjs name  <product.json>                    print nameShort
 import { readFileSync, writeFileSync } from "node:fs";
 
@@ -24,8 +24,8 @@ if (mode === "merge") {
     console.error("updateUrl points at Microsoft");
     process.exit(1);
   }
-  if ("defaultChatAgent" in p) {
-    console.error("defaultChatAgent is still in product.json");
+  if (!p.defaultChatAgent) {
+    console.error("defaultChatAgent is missing; the workbench needs it to start");
     process.exit(1);
   }
 } else if (mode === "name") {

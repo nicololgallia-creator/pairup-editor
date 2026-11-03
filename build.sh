@@ -30,10 +30,11 @@ ARCH=x64
 # Note: VSCodium does not delete keys. It overwrites the help URLs (prepare_vscode.sh
 # lines 37-51) and rewrites *.data.microsoft.com hosts (undo_telemetry.sh lines 10-11).
 # Code - OSS's own product.json has none of these except voiceWsUrl, so this list mostly
-# guards against a newer tag adding them. PairUp ships no Copilot: the chat agent keys go
-# too, and compile() deletes the built-in chat extension after packaging.
+# guards against a newer tag adding them. PairUp ships no Copilot: compile() deletes the
+# built-in chat extension after packaging and patches/05 turns AI features off by default.
+# defaultChatAgent stays: without it the 1.144 workbench never draws its window (found 2026-11-03).
 DELETE_KEYS='[
-  "defaultChatAgent","builtInExtensionsEnabledWithAutoUpdates","trustedExtensionAuthAccess","agentsTelemetryAppName",
+  "builtInExtensionsEnabledWithAutoUpdates","trustedExtensionAuthAccess","agentsTelemetryAppName",
   "enableTelemetry","aiConfig","crashReporter","msftInternalDomains","showTelemetryOptOut",
   "removeTelemetryMachineId","enabledTelemetryLevels",
   "tasConfig","npsSurveyUrl","surveys",
