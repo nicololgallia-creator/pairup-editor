@@ -13,7 +13,7 @@ const svgSrc = fs.readFileSync(path.join(iconsDir, "pairup.svg"), "utf8");
 // Only 16 and 32 differ from the authored SVG: heavier stroke (px), and at 16 the mark is a bit wider.
 // frac = mark width / icon width, sw = stroke in output pixels. Ring spacing keeps the authored ratio.
 const variants = {
-  256: null, 150: null, 70: null, 48: null,
+  256: null, 150: null, 128: null, 70: null, 48: null,
   32: { frac: 0.62, swPx: 2.2 },
   16: { frac: 0.70, swPx: 1.3 },
 };

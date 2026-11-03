@@ -1,5 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
   <rect width="256" height="256" rx="56" fill="#000"/>
-  <circle cx="105.3" cy="128" r="47" stroke="#ededed" stroke-width="14.3"/>
-  <circle cx="150.7" cy="128" r="47" stroke="#ededed" stroke-width="14.3"/>
+  <!-- The Gallia rooster (gallia-redesign/shared/logo/rooster.svg, viewBox 26 2 77 99), 168 px tall, centred. -->
+  <g transform="translate(18.5 40.6) scale(1.697)">
+    <path fill="#ededed" fill-rule="evenodd" d="M29 40 L30 15 L40 29 L47 5 L55 27 L66 11 L67 35 L79 44 L100 51 L79 58 L75 62 L71 86 L63 67 L61 98 L29 88 L36 62 Z M60 39 L65.5 45 L60 51 L54.5 45 Z"/>
+  </g>
 </svg>
