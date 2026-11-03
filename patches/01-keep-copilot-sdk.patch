@@ -1,14 +1,17 @@
 diff --git a/build/.moduleignore b/build/.moduleignore
-index 51149993..97dfb97b 100644
+index 51149993..61a12091 100644
 --- a/build/.moduleignore
 +++ b/build/.moduleignore
-@@ -224,6 +224,9 @@ zone.js/dist/**
+@@ -224,6 +224,12 @@ zone.js/dist/**
  # @github/copilot - strip unneeded binaries and files
  # Agent Host uses the runtime bundled with @github/copilot-sdk.
  @github/copilot/**
-+# PairUp: keep the whole package for the built-in extension. The in-tree build has no other source for it, and the
-+# packaging shim step (build/lib/copilot.ts) reads its package.json, sdk/ and tgrep/ and prunes the per-platform parts itself.
-+!@github/copilot/**
++# PairUp: the in-tree build has no other source for the built-in extension, and the packaging shim step
++# (build/lib/copilot.ts) reads these three from it. Nothing else is kept: the rest holds .node files for other
++# platforms that the version re-stamp step (rcedit) cannot load.
++!@github/copilot/package.json
++!@github/copilot/sdk/**
++!@github/copilot/tgrep/**
  
  # Standalone Copilot CLI platform packages are not product dependencies.
  @github/copilot-darwin-arm64/**
