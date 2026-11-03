@@ -117,6 +117,8 @@ compile() {
   # Same env as Microsoft's product-build-win32-setup.yml lines 101-105 (public CI path)
   export ELECTRON_SKIP_BINARY_DOWNLOAD=1 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 FOUNDRY_LOCAL_SKIP_INSTALL=1
   export npm_config_arch="$ARCH" npm_config_foreground_scripts=true
+  # extensions/copilot/.esbuild.mts refuses to build once product.json has a quality unless this is set (attempt 9).
+  export VSCODE_QUALITY="${VSCODE_QUALITY:-$(node -e "process.stdout.write(require('./vscode/product.json').quality || 'stable')")}"
   # The build id the app reports as its commit and the updater compares with the feed: one hash of this
   # repo's commit and the private repo's, so a change to either is a new version (build/lib/getVersion.ts).
   src="${PAIRUP_SRC:-$ROOT/../pairup-cloud}"; src="${src//\\//}"
