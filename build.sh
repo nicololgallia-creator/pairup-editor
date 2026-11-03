@@ -126,6 +126,10 @@ compile() {
   #   const vscodeTaskCI = task.define(`vscode${dashed(platform)}${dashed(arch)}${dashed(minified)}-ci`, ...
   # The one-command alternative (L632 vscodeTask, also compiles Copilot from source) is
   # `vscode-win32-x64-min`; use it if core-ci + -ci fails.
+  # The packaging step spawns a bare signtool.exe (build/gulpfile.vscode.ts, stripAuthenticodeSignature) to strip
+  # Microsoft's signatures from the native binaries it re-stamps. The runner has it in the Windows SDK, off PATH.
+  sdkbin="$(ls -d "/c/Program Files (x86)/Windows Kits/10/bin/10.0."*"/x64" 2>/dev/null | sort -V | tail -1 || true)"
+  if [ -n "$sdkbin" ]; then export PATH="$sdkbin:$PATH"; echo "signtool from $sdkbin"; else warn "no Windows SDK bin folder found; signtool.exe may be missing"; fi
   npm run gulp core-ci
   # The -ci packaging task expects the built-in Copilot extension already compiled (Microsoft's pipeline downloads it as a
   # VSIX); the non-CI chain compiles it from the tree first, so do the same. Found on the first runner build, 2026-11-03.
